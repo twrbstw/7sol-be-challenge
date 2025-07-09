@@ -2,7 +2,7 @@ package config
 
 import (
 	"os"
-	"seven-solutions-assignment/models"
+	"seven-solutions-challenge/src/models"
 )
 
 func LoadDefaultConfig() models.Configs {

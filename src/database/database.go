@@ -2,7 +2,7 @@ package database
 
 import (
 	"context"
-	"seven-solutions-assignment/models"
+	"seven-solutions-challenge/src/models"
 
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
@@ -38,16 +38,17 @@ func (d *DatabaseClient) Ping(ctx context.Context) error {
 }
 
 func NewDatabaseClient(ctx context.Context, dbCfg models.DbConfig) *DatabaseClient {
-	opts := options.Client().ApplyURI(dbCfg.Uri)
+	serverApi := options.ServerAPI(options.ServerAPIVersion1)
+	opts := options.Client().ApplyURI(dbCfg.Uri).SetServerAPIOptions(serverApi)
 
 	client, err := mongo.Connect(opts)
 	if err != nil {
-		panic("failed to connect to mongodb")
+		panic(err)
 	}
 
-	if err := client.Ping(ctx, readpref.Primary()); err != nil {
-		panic("failed to ping mongodb")
-	}
+	// if err := client.Ping(ctx, readpref.Primary()); err != nil {
+	// 	panic(err)
+	// }
 
 	return &DatabaseClient{
 		Client:   client,
