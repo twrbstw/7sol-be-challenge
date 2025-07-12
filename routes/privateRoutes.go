@@ -8,7 +8,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 )
 
-func RegisterRoutes(db database.DatabaseConnection) func(r fiber.Router) {
+func RegisterPrivateRoutes(db database.DatabaseConnection) func(r fiber.Router) {
 	userService := services.NewUserService(db)
 
 	return func(r fiber.Router) {

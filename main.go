@@ -5,6 +5,7 @@ import (
 	"seven-solutions-challenge/routes"
 	"seven-solutions-challenge/src/config"
 	"seven-solutions-challenge/src/database"
+	"seven-solutions-challenge/src/middleware"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -21,9 +22,14 @@ func main() {
 		}
 	}()
 
+	loggerMiddleware := middleware.NewLoggerMiddleware(cfg.LoggerConfig)
+
 	app := fiber.New()
-	authrouter := app.Group("/api") // add middleware here
-	authrouter.Route("/user", routes.RegisterRoutes(client))
+	app.Use(loggerMiddleware)
+	app.Route("/auth", routes.RegisterAuthRoutes(client))
+
+	privateRoutes := app.Group("/api") //add auth middleware
+	privateRoutes.Route("/user", routes.RegisterPrivateRoutes(client))
 
 	app.Listen(":3000")
 }

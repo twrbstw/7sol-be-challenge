@@ -46,9 +46,9 @@ func NewDatabaseClient(ctx context.Context, dbCfg models.DbConfig) *DatabaseClie
 		panic(err)
 	}
 
-	// if err := client.Ping(ctx, readpref.Primary()); err != nil {
-	// 	panic(err)
-	// }
+	if err := client.Ping(ctx, readpref.Primary()); err != nil {
+		panic(err)
+	}
 
 	return &DatabaseClient{
 		Client:   client,

@@ -11,5 +11,10 @@ func LoadDefaultConfig() models.Configs {
 			Uri:  os.Getenv("MONGO_URI"),
 			Name: os.Getenv("MONGO_NAME"),
 		},
+		LoggerConfig: models.LoggerConfig{
+			Format:     os.Getenv("LOGGER_FORMAT"),
+			TimeFormat: os.Getenv("LOGGER_TIME_FORMAT"),
+			TimeZone:   os.Getenv("LOGGER_TIME_ZONE"),
+		},
 	}
 }
