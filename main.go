@@ -16,6 +16,7 @@ func main() {
 	cfg := config.LoadDefaultConfig()
 
 	client := database.NewDatabaseClient(ctx, cfg.DbConfig)
+	client.CreateIndex(ctx)
 	defer func() {
 		if err := client.Disconnect(ctx); err != nil {
 			panic(err)

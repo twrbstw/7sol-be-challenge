@@ -4,6 +4,7 @@ import (
 	"context"
 	"seven-solutions-challenge/src/models"
 
+	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
@@ -15,6 +16,7 @@ type DatabaseConnection interface {
 	GetCollection(c DatabaseCollection, opts ...*options.CollectionOptions) *mongo.Collection
 	Disconnect(ctx context.Context) error
 	Ping(ctx context.Context) error
+	CreateIndex(ctx context.Context)
 }
 
 type DatabaseClient struct {
@@ -53,5 +55,18 @@ func NewDatabaseClient(ctx context.Context, dbCfg models.DbConfig) *DatabaseClie
 	return &DatabaseClient{
 		Client:   client,
 		Database: client.Database(dbCfg.Name),
+	}
+}
+
+func (d DatabaseClient) CreateIndex(ctx context.Context) {
+	collection := d.Database.Collection(COLLECTION_USERS.String())
+	indexModel := mongo.IndexModel{
+		Keys:    bson.D{{Key: "email", Value: 1}},
+		Options: options.Index().SetUnique(true),
+	}
+
+	_, err := collection.Indexes().CreateOne(ctx, indexModel)
+	if err != nil {
+		panic(err)
 	}
 }

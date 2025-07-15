@@ -42,7 +42,18 @@ func (u UserHandler) List(ctx *fiber.Ctx) error {
 }
 
 func (u UserHandler) Create(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusOK).SendString("")
+	var req requests.CreateUserReq
+	err := ctx.BodyParser(&req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString(e.ERR_PARSING_REQ)
+	}
+
+	res, err := u.userService.Create(ctx.Context(), req)
+	if err != nil {
+		respCode := handleErrResp(err)
+		return ctx.Status(respCode).SendString(err.Error())
+	}
+	return ctx.Status(fiber.StatusOK).JSON(res)
 }
 
 func (u UserHandler) Update(ctx *fiber.Ctx) error {
@@ -57,6 +68,8 @@ func handleErrResp(err error) int {
 	switch err.Error() {
 	case e.ERR_USER_NOT_FOUND:
 		return fiber.StatusNotFound
+	case e.ERR_USER_EMAIL_DUPLICATED:
+		return fiber.StatusBadRequest
 	default:
 		return fiber.StatusInternalServerError
 	}
