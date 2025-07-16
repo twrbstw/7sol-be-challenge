@@ -10,13 +10,9 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
 )
 
-var _ DatabaseConnection = (*DatabaseClient)(nil)
-
 type DatabaseConnection interface {
-	GetCollection(c DatabaseCollection, opts ...*options.CollectionOptions) *mongo.Collection
+	GetCollection(c DatabaseCollection) *mongo.Collection
 	Disconnect(ctx context.Context) error
-	Ping(ctx context.Context) error
-	CreateIndex(ctx context.Context)
 }
 
 type DatabaseClient struct {
@@ -24,22 +20,17 @@ type DatabaseClient struct {
 	Database *mongo.Database
 }
 
+// GetCollection implements DatabaseConnection.
+func (d *DatabaseClient) GetCollection(c DatabaseCollection) *mongo.Collection {
+	return d.Database.Collection(c.String())
+}
+
 // Disconnect implements DatabaseConnection.
 func (d *DatabaseClient) Disconnect(ctx context.Context) error {
 	return d.Client.Disconnect(ctx)
 }
 
-// GetCollection implements DatabaseConnection.
-func (d *DatabaseClient) GetCollection(c DatabaseCollection, opts ...*options.CollectionOptions) *mongo.Collection {
-	return d.Database.Collection(c.String())
-}
-
-// Ping implements DatabaseConnection.
-func (d *DatabaseClient) Ping(ctx context.Context) error {
-	return d.Client.Ping(ctx, readpref.Primary())
-}
-
-func NewDatabaseClient(ctx context.Context, dbCfg models.DbConfig) *DatabaseClient {
+func NewDatabaseClient(ctx context.Context, dbCfg models.DbConfig) DatabaseConnection {
 	serverApi := options.ServerAPI(options.ServerAPIVersion1)
 	opts := options.Client().ApplyURI(dbCfg.Uri).SetServerAPIOptions(serverApi)
 
@@ -52,14 +43,19 @@ func NewDatabaseClient(ctx context.Context, dbCfg models.DbConfig) *DatabaseClie
 		panic(err)
 	}
 
+	err = createUserIndex(ctx, client, dbCfg.Name)
+	if err != nil {
+		panic(err)
+	}
+
 	return &DatabaseClient{
 		Client:   client,
 		Database: client.Database(dbCfg.Name),
 	}
 }
 
-func (d DatabaseClient) CreateIndex(ctx context.Context) {
-	collection := d.Database.Collection(COLLECTION_USERS.String())
+func createUserIndex(ctx context.Context, c *mongo.Client, dbName string) error {
+	collection := c.Database(dbName).Collection(COLLECTION_USERS.String())
 	indexModel := mongo.IndexModel{
 		Keys:    bson.D{{Key: "email", Value: 1}},
 		Options: options.Index().SetUnique(true),
@@ -67,6 +63,7 @@ func (d DatabaseClient) CreateIndex(ctx context.Context) {
 
 	_, err := collection.Indexes().CreateOne(ctx, indexModel)
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }

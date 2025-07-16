@@ -19,8 +19,8 @@ func NewUserHandler(userService services.IUserService) *UserHandler {
 }
 
 func (u UserHandler) RegisterRoutes(r fiber.Router) {
-	r.Get("/:uid", u.Get)
 	r.Get("/list", u.List)
+	r.Get("/:uid", u.Get)
 	r.Post("/", u.Create)
 	r.Put("/:uid", u.Update)
 	r.Delete("/:uid", u.Delete)
@@ -31,46 +31,67 @@ func (u UserHandler) Get(ctx *fiber.Ctx) error {
 
 	user, err := u.userService.GetById(ctx.Context(), requests.GetUserByIdReq{ID: uid})
 	if err != nil {
-		respCode := handleErrResp(err)
+		respCode := e.HandleErrResp(err)
 		return ctx.Status(respCode).SendString(err.Error())
 	}
 	return ctx.Status(fiber.StatusOK).JSON(user)
 }
 
 func (u UserHandler) List(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusOK).SendString("")
+	users, err := u.userService.List(ctx.Context())
+	if err != nil {
+		respCode := e.HandleErrResp(err)
+		return ctx.Status(respCode).SendString(err.Error())
+	}
+	return ctx.Status(fiber.StatusOK).JSON(users)
 }
 
 func (u UserHandler) Create(ctx *fiber.Ctx) error {
 	var req requests.CreateUserReq
 	err := ctx.BodyParser(&req)
 	if err != nil {
-		return ctx.Status(fiber.StatusInternalServerError).SendString(e.ERR_PARSING_REQ)
+		return ctx.Status(fiber.StatusInternalServerError).SendString(e.ERR_HANDLER_PARSING_REQ)
 	}
 
 	res, err := u.userService.Create(ctx.Context(), req)
 	if err != nil {
-		respCode := handleErrResp(err)
+		respCode := e.HandleErrResp(err)
 		return ctx.Status(respCode).SendString(err.Error())
 	}
-	return ctx.Status(fiber.StatusOK).JSON(res)
+	return ctx.Status(fiber.StatusCreated).JSON(res)
 }
 
 func (u UserHandler) Update(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusOK).SendString("")
+	uid := ctx.Params("uid")
+
+	var req requests.UpdateUserReq
+	err := ctx.BodyParser(&req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString(e.ERR_HANDLER_PARSING_REQ)
+	}
+
+	req.Id = uid
+	if !req.Validate() {
+		return ctx.Status(fiber.StatusBadRequest).SendString(e.ERR_HANDLER_NAME_OR_EMAIL_EMPTY)
+	}
+
+	err = u.userService.Update(ctx.Context(), req)
+	if err != nil {
+		respCode := e.HandleErrResp(err)
+		return ctx.Status(respCode).SendString(err.Error())
+	}
+
+	return ctx.SendStatus(fiber.StatusOK)
 }
 
 func (u UserHandler) Delete(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusOK).SendString("")
-}
+	uid := ctx.Params("uid")
 
-func handleErrResp(err error) int {
-	switch err.Error() {
-	case e.ERR_USER_NOT_FOUND:
-		return fiber.StatusNotFound
-	case e.ERR_USER_EMAIL_DUPLICATED:
-		return fiber.StatusBadRequest
-	default:
-		return fiber.StatusInternalServerError
+	err := u.userService.Delete(ctx.Context(), requests.DeleteUserReq{Id: uid})
+	if err != nil {
+		respCode := e.HandleErrResp(err)
+		return ctx.Status(respCode).SendString(err.Error())
 	}
+
+	return ctx.SendStatus(fiber.StatusOK)
 }
