@@ -7,4 +7,6 @@ type AuthRegisterReq struct {
 }
 
 type AuthLoginReq struct {
+	Email    string `json:"email"`
+	Password string `json:"password"`
 }

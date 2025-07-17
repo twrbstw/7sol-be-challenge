@@ -17,6 +17,7 @@ type IUserRepo interface {
 	List(ctx context.Context) ([]models.User, error)
 	Update(ctx context.Context, req UpdateReq) error
 	Delete(ctx context.Context, req DeleteReq) error
+	GetByEmail(ctx context.Context, req GetByEmail) (*models.User, error)
 }
 
 type UserRepo struct {
@@ -42,13 +43,7 @@ func (u *UserRepo) GetById(ctx context.Context, req GetByIdReq) (*models.User, e
 		return nil, errors.New(err.Error())
 	}
 
-	return &models.User{
-		Id:        result.Id,
-		Name:      result.Name,
-		Email:     result.Email,
-		Password:  result.Password,
-		CreatedAt: result.CreatedAt,
-	}, nil
+	return &result, nil
 }
 
 func (u *UserRepo) Create(ctx context.Context, req CreateReq) (*models.User, error) {
@@ -127,4 +122,19 @@ func (u *UserRepo) Delete(ctx context.Context, req DeleteReq) error {
 	}
 
 	return nil
+}
+
+func (u *UserRepo) GetByEmail(ctx context.Context, req GetByEmail) (*models.User, error) {
+	filter := bson.D{{Key: "email", Value: req.Email}}
+
+	var result models.User
+	err := u.userCollection.FindOne(ctx, filter).Decode(&result)
+	if err != nil {
+		if err == mongo.ErrNoDocuments {
+			return nil, errors.New(e.ERR_USER_NOT_FOUND)
+		}
+		return nil, errors.New(err.Error())
+	}
+
+	return &result, nil
 }

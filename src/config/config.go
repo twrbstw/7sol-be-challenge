@@ -16,5 +16,9 @@ func LoadDefaultConfig() models.Configs {
 			TimeFormat: os.Getenv("LOGGER_TIME_FORMAT"),
 			TimeZone:   os.Getenv("LOGGER_TIME_ZONE"),
 		},
+		AppConfig: models.AppConfig{
+			TokenTimeout: os.Getenv("APP_TOKEN_TIMEOUT"),
+			SecretKey:    os.Getenv("APP_SECRET_KEY"),
+		},
 	}
 }

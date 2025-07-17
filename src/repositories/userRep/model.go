@@ -23,3 +23,7 @@ type UpdateReq struct {
 type DeleteReq struct {
 	Id string
 }
+
+type GetByEmail struct {
+	Email string
+}

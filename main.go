@@ -26,7 +26,7 @@ func main() {
 
 	app := fiber.New()
 	app.Use(loggerMiddleware)
-	app.Route("/auth", routes.RegisterAuthRoutes(client))
+	app.Route("/auth", routes.RegisterAuthRoutes(client, cfg.AppConfig))
 
 	privateRoutes := app.Group("/api") //add auth middleware
 	privateRoutes.Route("/user", routes.RegisterPrivateRoutes(client))

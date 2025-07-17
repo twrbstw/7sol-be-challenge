@@ -10,7 +10,9 @@ const (
 
 //for service layer
 const (
-	ERR_SERVICE_HASHING = "err:service:hashing_failed"
+	ERR_SERVICE_HASHING                     = "err:service:hashing_failed"
+	ERR_SERVICE_INCORRECT_EMAIL_OR_PASSWORD = "err:service:incorrect_email_or_password"
+	ERR_SERVICE_GENERATING_JWT_FAILED       = "err:service:generating_jwt_failed"
 )
 
 //for repository layer
@@ -25,6 +27,8 @@ func HandleErrResp(err error) int {
 		return fiber.StatusNotFound
 	case ERR_USER_EMAIL_DUPLICATED:
 		return fiber.StatusBadRequest
+	case ERR_SERVICE_INCORRECT_EMAIL_OR_PASSWORD:
+		return fiber.StatusUnauthorized
 	default:
 		return fiber.StatusInternalServerError
 	}

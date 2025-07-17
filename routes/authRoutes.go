@@ -3,15 +3,16 @@ package routes
 import (
 	"seven-solutions-challenge/src/database"
 	"seven-solutions-challenge/src/handlers"
+	"seven-solutions-challenge/src/models"
 	repositories "seven-solutions-challenge/src/repositories/userRep"
 	"seven-solutions-challenge/src/services"
 
 	"github.com/gofiber/fiber/v2"
 )
 
-func RegisterAuthRoutes(db database.DatabaseConnection) func(r fiber.Router) {
+func RegisterAuthRoutes(db database.DatabaseConnection, appCfg models.AppConfig) func(r fiber.Router) {
 	userRepo := repositories.NewUserRepo(db)
-	authService := services.NewAuthService(userRepo)
+	authService := services.NewAuthService(userRepo, appCfg)
 
 	return func(r fiber.Router) {
 		authHandler := handlers.NewAuthHandler(authService)

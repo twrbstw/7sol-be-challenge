@@ -40,5 +40,17 @@ func (a AuthHandler) Register(ctx *fiber.Ctx) error {
 }
 
 func (a AuthHandler) Login(ctx *fiber.Ctx) error {
-	return ctx.Status(fiber.StatusOK).SendString("")
+	var req requests.AuthLoginReq
+	err := ctx.BodyParser(&req)
+	if err != nil {
+		return ctx.Status(fiber.StatusInternalServerError).SendString(e.ERR_HANDLER_PARSING_REQ)
+	}
+
+	resp, err := a.authService.Login(ctx.Context(), req)
+	if err != nil {
+		respCode := e.HandleErrResp(err)
+		return ctx.Status(respCode).SendString(err.Error())
+	}
+
+	return ctx.Status(fiber.StatusOK).JSON(resp)
 }
