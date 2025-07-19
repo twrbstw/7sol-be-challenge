@@ -4,6 +4,7 @@ import (
 	e "seven-solutions-challenge/src/errors"
 	"seven-solutions-challenge/src/requests"
 	"seven-solutions-challenge/src/services"
+	"seven-solutions-challenge/src/utils"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -30,6 +31,10 @@ func (a AuthHandler) Register(ctx *fiber.Ctx) error {
 		return ctx.Status(fiber.StatusInternalServerError).SendString(e.ERR_HANDLER_PARSING_REQ)
 	}
 
+	if err := utils.ValidateBody(ctx, &req); err != nil {
+		return ctx.SendStatus(fiber.StatusBadRequest)
+	}
+
 	err = a.authService.Register(ctx.Context(), req)
 	if err != nil {
 		respCode := e.HandleErrResp(err)
@@ -44,6 +49,10 @@ func (a AuthHandler) Login(ctx *fiber.Ctx) error {
 	err := ctx.BodyParser(&req)
 	if err != nil {
 		return ctx.Status(fiber.StatusInternalServerError).SendString(e.ERR_HANDLER_PARSING_REQ)
+	}
+
+	if err := utils.ValidateBody(ctx, &req); err != nil {
+		return ctx.SendStatus(fiber.StatusBadRequest)
 	}
 
 	resp, err := a.authService.Login(ctx.Context(), req)
