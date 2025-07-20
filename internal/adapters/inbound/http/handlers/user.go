@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"seven-solutions-challenge/internal/adapters/inbound/http/requests"
-	"seven-solutions-challenge/internal/app/services"
+	"seven-solutions-challenge/internal/app/ports"
 	e "seven-solutions-challenge/internal/shared/errors"
 	"seven-solutions-challenge/pkg"
 
@@ -10,10 +10,10 @@ import (
 )
 
 type UserHandler struct {
-	userService services.IUserService
+	userService ports.IUserService
 }
 
-func NewUserHandler(userService services.IUserService) *UserHandler {
+func NewUserHandler(userService ports.IUserService) *UserHandler {
 	return &UserHandler{
 		userService: userService,
 	}

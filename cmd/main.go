@@ -49,12 +49,12 @@ func main() {
 	startAppWithGracefulShutdown(app, cancel, &wg)
 }
 
-func initRepositories(client d.DatabaseConnection) repositories.IUserRepo {
+func initRepositories(client d.DatabaseConnection) ports.IUserRepo {
 	userRepo := repositories.NewUserRepo(client)
 	return userRepo
 }
 
-func initWorkers(userRepo repositories.IUserRepo) []ports.IWorkers {
+func initWorkers(userRepo ports.IUserRepo) []ports.IWorkers {
 	var workersList []ports.IWorkers
 
 	listUserWorker := workers.NewListUsersWorker(userRepo)

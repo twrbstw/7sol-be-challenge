@@ -5,6 +5,7 @@ import (
 	"errors"
 	d "seven-solutions-challenge/internal/adapters/outbound/db/mongo"
 	"seven-solutions-challenge/internal/adapters/outbound/db/mongo/requests"
+	"seven-solutions-challenge/internal/app/ports"
 	"seven-solutions-challenge/internal/domain"
 	e "seven-solutions-challenge/internal/shared/errors"
 
@@ -12,20 +13,11 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo"
 )
 
-type IUserRepo interface {
-	GetById(ctx context.Context, req requests.GetByIdReq) (*domain.User, error)
-	Create(ctx context.Context, req requests.CreateReq) (*domain.User, error)
-	List(ctx context.Context) ([]domain.User, error)
-	Update(ctx context.Context, req requests.UpdateReq) error
-	Delete(ctx context.Context, req requests.DeleteReq) error
-	GetByEmail(ctx context.Context, req requests.GetByEmailReq) (*domain.User, error)
-}
-
 type UserRepo struct {
 	userCollection *mongo.Collection
 }
 
-func NewUserRepo(db d.DatabaseConnection) IUserRepo {
+func NewUserRepo(db d.DatabaseConnection) ports.IUserRepo {
 	userCollection := db.GetCollection(d.COLLECTION_USERS)
 	return &UserRepo{
 		userCollection: userCollection,

@@ -2,7 +2,7 @@ package handlers
 
 import (
 	"seven-solutions-challenge/internal/adapters/inbound/http/requests"
-	"seven-solutions-challenge/internal/app/services"
+	"seven-solutions-challenge/internal/app/ports"
 	e "seven-solutions-challenge/internal/shared/errors"
 	"seven-solutions-challenge/pkg"
 
@@ -10,10 +10,10 @@ import (
 )
 
 type AuthHandler struct {
-	authService services.IAuthService
+	authService ports.IAuthService
 }
 
-func NewAuthHandler(authService services.IAuthService) *AuthHandler {
+func NewAuthHandler(authService ports.IAuthService) *AuthHandler {
 	return &AuthHandler{
 		authService: authService,
 	}

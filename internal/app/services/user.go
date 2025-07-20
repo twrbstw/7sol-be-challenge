@@ -5,8 +5,8 @@ import (
 	"errors"
 	request "seven-solutions-challenge/internal/adapters/inbound/http/requests"
 	response "seven-solutions-challenge/internal/adapters/inbound/http/responses"
-	"seven-solutions-challenge/internal/adapters/outbound/db/mongo/repositories"
 	"seven-solutions-challenge/internal/adapters/outbound/db/mongo/requests"
+	"seven-solutions-challenge/internal/app/ports"
 	e "seven-solutions-challenge/internal/shared/errors"
 	"seven-solutions-challenge/pkg"
 	"time"
@@ -14,19 +14,11 @@ import (
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
-type IUserService interface {
-	GetById(ctx context.Context, req request.GetUserByIdReq) (*response.GetUserByIdResp, error)
-	List(ctx context.Context) (*response.ListUserResp, error)
-	Create(ctx context.Context, req request.CreateUserReq) (*response.CreateUserResp, error)
-	Update(ctx context.Context, req request.UpdateUserReq) error
-	Delete(ctx context.Context, req request.DeleteUserReq) error
-}
-
 type UserService struct {
-	userRepo repositories.IUserRepo
+	userRepo ports.IUserRepo
 }
 
-func NewUserService(userRepo repositories.IUserRepo) IUserService {
+func NewUserService(userRepo ports.IUserRepo) ports.IUserService {
 	return &UserService{
 		userRepo: userRepo,
 	}

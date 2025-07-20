@@ -3,10 +3,10 @@ package services
 import (
 	"context"
 	"errors"
-	request "seven-solutions-challenge/internal/adapters/inbound/http/requests"
-	response "seven-solutions-challenge/internal/adapters/inbound/http/responses"
-	"seven-solutions-challenge/internal/adapters/outbound/db/mongo/repositories"
-	"seven-solutions-challenge/internal/adapters/outbound/db/mongo/requests"
+	"seven-solutions-challenge/internal/adapters/inbound/http/requests"
+	"seven-solutions-challenge/internal/adapters/inbound/http/responses"
+	mongoreq "seven-solutions-challenge/internal/adapters/outbound/db/mongo/requests"
+	"seven-solutions-challenge/internal/app/ports"
 	"seven-solutions-challenge/internal/domain"
 	e "seven-solutions-challenge/internal/shared/errors"
 	"seven-solutions-challenge/pkg"
@@ -16,17 +16,12 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-type IAuthService interface {
-	Register(ctx context.Context, req request.AuthRegisterReq) error
-	Login(ctx context.Context, req request.AuthLoginReq) (*response.AuthLoginResp, error)
-}
-
 type AuthService struct {
-	userRepo repositories.IUserRepo
+	userRepo ports.IUserRepo
 	appCfg   domain.AppConfig
 }
 
-func NewAuthService(userRepo repositories.IUserRepo, appCfg domain.AppConfig) IAuthService {
+func NewAuthService(userRepo ports.IUserRepo, appCfg domain.AppConfig) ports.IAuthService {
 	return &AuthService{
 		userRepo: userRepo,
 		appCfg:   appCfg,
@@ -34,8 +29,8 @@ func NewAuthService(userRepo repositories.IUserRepo, appCfg domain.AppConfig) IA
 }
 
 // Login implements IAuthService.
-func (a *AuthService) Login(ctx context.Context, req request.AuthLoginReq) (*response.AuthLoginResp, error) {
-	user, err := a.userRepo.GetByEmail(ctx, requests.GetByEmailReq{Email: req.Email})
+func (a *AuthService) Login(ctx context.Context, req requests.AuthLoginReq) (*responses.AuthLoginResp, error) {
+	user, err := a.userRepo.GetByEmail(ctx, mongoreq.GetByEmailReq{Email: req.Email})
 	if err != nil {
 		return nil, err
 	}
@@ -49,20 +44,20 @@ func (a *AuthService) Login(ctx context.Context, req request.AuthLoginReq) (*res
 	if err != nil {
 		return nil, errors.New(e.ERR_SERVICE_GENERATING_JWT_FAILED)
 	}
-	return &response.AuthLoginResp{
+	return &responses.AuthLoginResp{
 		Email: user.Email,
 		Token: token,
 	}, nil
 }
 
 // Register implements IAuthService.
-func (a *AuthService) Register(ctx context.Context, req request.AuthRegisterReq) error {
+func (a *AuthService) Register(ctx context.Context, req requests.AuthRegisterReq) error {
 	hashedPassword, err := pkg.HashString(req.Password)
 	if err != nil {
 		return errors.New(e.ERR_SERVICE_HASHING)
 	}
 
-	a.userRepo.Create(ctx, requests.CreateReq{
+	a.userRepo.Create(ctx, mongoreq.CreateReq{
 		Id:        primitive.NewObjectID().Hex(),
 		Name:      req.Name,
 		Email:     req.Email,

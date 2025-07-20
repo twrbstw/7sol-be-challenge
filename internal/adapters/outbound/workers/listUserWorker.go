@@ -3,7 +3,6 @@ package workers
 import (
 	"context"
 	"log"
-	"seven-solutions-challenge/internal/adapters/outbound/db/mongo/repositories"
 	"seven-solutions-challenge/internal/app/ports"
 	"sync"
 	"time"
@@ -11,10 +10,10 @@ import (
 
 type ListUsersWorker struct {
 	name     string
-	userRepo repositories.IUserRepo
+	userRepo ports.IUserRepo
 }
 
-func NewListUsersWorker(userRepo repositories.IUserRepo) ports.IWorkers {
+func NewListUsersWorker(userRepo ports.IUserRepo) ports.IWorkers {
 	return &ListUsersWorker{
 		name:     "LIST_USER_WORKER",
 		userRepo: userRepo,
