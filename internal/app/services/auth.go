@@ -57,13 +57,16 @@ func (a *AuthService) Register(ctx context.Context, req requests.AuthRegisterReq
 		return errors.New(e.ERR_SERVICE_HASHING)
 	}
 
-	a.userRepo.Create(ctx, mongoreq.CreateReq{
+	_, err = a.userRepo.Create(ctx, mongoreq.CreateReq{
 		Id:        primitive.NewObjectID().Hex(),
 		Name:      req.Name,
 		Email:     req.Email,
 		Password:  hashedPassword,
 		CreatedAt: time.Now(),
 	})
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
