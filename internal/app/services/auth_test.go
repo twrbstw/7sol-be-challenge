@@ -57,7 +57,7 @@ func TestRegisterCreateError(t *testing.T) {
 	authService := services.NewAuthService(mockUserRepo, mockBcryptHasher, mockJwtGenerator)
 
 	mockBcryptHasher.EXPECT().HashPassword(gomock.Any()).Return("test_hashed_password", nil)
-	expectedError := errors.New("test_error")
+	expected := errors.New("test_error")
 	mockUserRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, errors.New("test_error"))
 
 	err := authService.Register(ctx, requests.AuthRegisterReq{
@@ -66,7 +66,7 @@ func TestRegisterCreateError(t *testing.T) {
 		Password: "test_password",
 	})
 
-	assert.Equal(t, expectedError, err)
+	assert.Equal(t, expected, err)
 }
 
 func TestRegisterHasherError(t *testing.T) {
@@ -78,7 +78,7 @@ func TestRegisterHasherError(t *testing.T) {
 	mockJwtGenerator := mockPorts.NewMockIJwtGenerator(ctrl)
 	authService := services.NewAuthService(mockUserRepo, mockBcryptHasher, mockJwtGenerator)
 
-	expectedError := errors.New(e.ERR_SERVICE_HASHING)
+	expected := errors.New(e.ERR_SERVICE_HASHING)
 	mockBcryptHasher.EXPECT().HashPassword(gomock.Any()).Return("", errors.New(e.ERR_SERVICE_HASHING))
 
 	err := authService.Register(ctx, requests.AuthRegisterReq{
@@ -87,7 +87,7 @@ func TestRegisterHasherError(t *testing.T) {
 		Password: "test_password",
 	})
 
-	assert.Equal(t, expectedError, err)
+	assert.Equal(t, expected, err)
 }
 
 func TestLoginSuccess(t *testing.T) {
@@ -132,7 +132,7 @@ func TestLoginGetByEmailError(t *testing.T) {
 	mockJwtGenerator := mockPorts.NewMockIJwtGenerator(ctrl)
 	authService := services.NewAuthService(mockUserRepo, mockBcryptHasher, mockJwtGenerator)
 
-	expectedError := errors.New("test_error")
+	expected := errors.New("test_error")
 	mockUserRepo.EXPECT().GetByEmail(gomock.Any(), gomock.Any()).Return(nil, errors.New("test_error"))
 
 	resp, err := authService.Login(ctx, requests.AuthLoginReq{
@@ -141,7 +141,7 @@ func TestLoginGetByEmailError(t *testing.T) {
 	})
 
 	assert.Nil(t, resp)
-	assert.Equal(t, expectedError, err)
+	assert.Equal(t, expected, err)
 }
 
 func TestLoginBcryptHasherError(t *testing.T) {
@@ -159,7 +159,7 @@ func TestLoginBcryptHasherError(t *testing.T) {
 		Email:    "test_email",
 		Password: "test_hashed_password",
 	}, nil)
-	expectedError := errors.New(e.ERR_SERVICE_INCORRECT_EMAIL_OR_PASSWORD)
+	expected := errors.New(e.ERR_SERVICE_INCORRECT_EMAIL_OR_PASSWORD)
 	mockBcryptHasher.EXPECT().ComparePassword(gomock.Any(), gomock.Any()).Return(errors.New(e.ERR_SERVICE_INCORRECT_EMAIL_OR_PASSWORD))
 
 	resp, err := authService.Login(ctx, requests.AuthLoginReq{
@@ -168,7 +168,7 @@ func TestLoginBcryptHasherError(t *testing.T) {
 	})
 
 	assert.Nil(t, resp)
-	assert.Equal(t, expectedError, err)
+	assert.Equal(t, expected, err)
 }
 
 func TestLoginGenerateJwtError(t *testing.T) {
@@ -187,7 +187,7 @@ func TestLoginGenerateJwtError(t *testing.T) {
 		Password: "test_hashed_password",
 	}, nil)
 	mockBcryptHasher.EXPECT().ComparePassword(gomock.Any(), gomock.Any()).Return(nil)
-	expectedError := errors.New(e.ERR_SERVICE_GENERATING_JWT_FAILED)
+	expected := errors.New(e.ERR_SERVICE_GENERATING_JWT_FAILED)
 	mockJwtGenerator.EXPECT().GenerateJwt(gomock.Any(), gomock.Any()).Return("", errors.New(e.ERR_SERVICE_GENERATING_JWT_FAILED))
 
 	resp, err := authService.Login(ctx, requests.AuthLoginReq{
@@ -196,5 +196,5 @@ func TestLoginGenerateJwtError(t *testing.T) {
 	})
 
 	assert.Nil(t, resp)
-	assert.Equal(t, expectedError, err)
+	assert.Equal(t, expected, err)
 }
