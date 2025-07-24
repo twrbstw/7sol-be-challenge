@@ -7,7 +7,7 @@ import (
 	"seven-solutions-challenge/internal/adapters/outbound/db/mongo/requests"
 	"seven-solutions-challenge/internal/app/ports"
 	"seven-solutions-challenge/internal/domain"
-	e "seven-solutions-challenge/internal/shared/errors"
+	e "seven-solutions-challenge/pkg/errors"
 
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo"

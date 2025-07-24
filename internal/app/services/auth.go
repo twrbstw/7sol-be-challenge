@@ -7,24 +7,23 @@ import (
 	"seven-solutions-challenge/internal/adapters/inbound/http/responses"
 	mongoreq "seven-solutions-challenge/internal/adapters/outbound/db/mongo/requests"
 	"seven-solutions-challenge/internal/app/ports"
-	"seven-solutions-challenge/internal/domain"
-	e "seven-solutions-challenge/internal/shared/errors"
-	"seven-solutions-challenge/pkg"
+	e "seven-solutions-challenge/pkg/errors"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
-	"golang.org/x/crypto/bcrypt"
 )
 
 type AuthService struct {
-	userRepo ports.IUserRepo
-	appCfg   domain.AppConfig
+	userRepo     ports.IUserRepo
+	bcryptHasher ports.IHasher
+	jwtGenerator ports.IJwtGenerator
 }
 
-func NewAuthService(userRepo ports.IUserRepo, appCfg domain.AppConfig) ports.IAuthService {
+func NewAuthService(userRepo ports.IUserRepo, bcryptHasher ports.IHasher, jwtGenerator ports.IJwtGenerator) ports.IAuthService {
 	return &AuthService{
-		userRepo: userRepo,
-		appCfg:   appCfg,
+		userRepo:     userRepo,
+		bcryptHasher: bcryptHasher,
+		jwtGenerator: jwtGenerator,
 	}
 }
 
@@ -35,12 +34,12 @@ func (a *AuthService) Login(ctx context.Context, req requests.AuthLoginReq) (*re
 		return nil, err
 	}
 
-	err = bcrypt.CompareHashAndPassword([]byte(user.Password), []byte(req.Password))
+	err = a.bcryptHasher.ComparePassword(user.Password, req.Password)
 	if err != nil {
 		return nil, errors.New(e.ERR_SERVICE_INCORRECT_EMAIL_OR_PASSWORD)
 	}
 
-	token, err := pkg.GenerateJwt(user.Name, user.Email, a.appCfg)
+	token, err := a.jwtGenerator.GenerateJwt(user.Name, user.Email)
 	if err != nil {
 		return nil, errors.New(e.ERR_SERVICE_GENERATING_JWT_FAILED)
 	}
@@ -52,7 +51,7 @@ func (a *AuthService) Login(ctx context.Context, req requests.AuthLoginReq) (*re
 
 // Register implements IAuthService.
 func (a *AuthService) Register(ctx context.Context, req requests.AuthRegisterReq) error {
-	hashedPassword, err := pkg.HashString(req.Password)
+	hashedPassword, err := a.bcryptHasher.HashPassword(req.Password)
 	if err != nil {
 		return errors.New(e.ERR_SERVICE_HASHING)
 	}

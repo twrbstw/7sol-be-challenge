@@ -3,8 +3,8 @@ package handlers
 import (
 	"seven-solutions-challenge/internal/adapters/inbound/http/requests"
 	"seven-solutions-challenge/internal/app/ports"
-	e "seven-solutions-challenge/internal/shared/errors"
 	"seven-solutions-challenge/pkg"
+	e "seven-solutions-challenge/pkg/errors"
 
 	"github.com/gofiber/fiber/v2"
 )

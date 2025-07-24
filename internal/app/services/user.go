@@ -7,20 +7,21 @@ import (
 	response "seven-solutions-challenge/internal/adapters/inbound/http/responses"
 	"seven-solutions-challenge/internal/adapters/outbound/db/mongo/requests"
 	"seven-solutions-challenge/internal/app/ports"
-	e "seven-solutions-challenge/internal/shared/errors"
-	"seven-solutions-challenge/pkg"
+	e "seven-solutions-challenge/pkg/errors"
 	"time"
 
 	"go.mongodb.org/mongo-driver/bson/primitive"
 )
 
 type UserService struct {
-	userRepo ports.IUserRepo
+	userRepo     ports.IUserRepo
+	bcryptHasher ports.IHasher
 }
 
-func NewUserService(userRepo ports.IUserRepo) ports.IUserService {
+func NewUserService(userRepo ports.IUserRepo, bcryptHasher ports.IHasher) ports.IUserService {
 	return &UserService{
-		userRepo: userRepo,
+		userRepo:     userRepo,
+		bcryptHasher: bcryptHasher,
 	}
 }
 
@@ -65,7 +66,7 @@ func (u *UserService) List(ctx context.Context) (*response.ListUserResp, error) 
 
 // Create implements IUserService.
 func (u *UserService) Create(ctx context.Context, req request.CreateUserReq) (*response.CreateUserResp, error) {
-	hashedPassword, err := pkg.HashString(req.Password)
+	hashedPassword, err := u.bcryptHasher.HashPassword(req.Password)
 	if err != nil {
 		return nil, errors.New(e.ERR_SERVICE_HASHING)
 	}
