@@ -1,0 +1,7 @@
+.git
+vendor
+node_modules
+*.md
+*.env
+*.test
+*.log

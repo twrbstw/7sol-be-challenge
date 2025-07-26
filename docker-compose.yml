@@ -1,0 +1,29 @@
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: 7sol-be-challenge
+    ports:
+      - "8080:8080"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/
+      - MONGO_NAME=database
+      - LOGGER_FORMAT=${status} - ${method} ${path} | ${time}​
+      - LOGGER_TIME_FORMAT=02-Jan-2006 15:04:05Z07:00
+      - LOGGER_TIME_ZONE=UTC
+      - APP_TOKEN_TIMEOUT=5
+      - APP_SECRET_KEY=example_secret_key
+    depends_on:
+      - mongo
+
+  mongo:
+    image: mongo:6
+    container_name: mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+volumes:
+  mongo_data:
