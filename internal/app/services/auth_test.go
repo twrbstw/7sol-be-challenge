@@ -20,7 +20,7 @@ import (
 var ctx = context.Background()
 var timeNow = time.Now()
 
-func setup(t *testing.T) (ports.IAuthService,
+func setupAuthServiceTest(t *testing.T) (ports.IAuthService,
 	*mockPorts.MockIUserRepo,
 	*mockPorts.MockIHasher,
 	*mockPorts.MockIJwtGenerator,
@@ -38,7 +38,7 @@ func setup(t *testing.T) (ports.IAuthService,
 
 func TestRegister(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		authService, mockUserRepo, mockBcryptHasher, _ := setup(t)
+		authService, mockUserRepo, mockBcryptHasher, _ := setupAuthServiceTest(t)
 
 		mockBcryptHasher.EXPECT().HashPassword(gomock.Any()).Return("test_hashed_password", nil)
 		output := domain.User{
@@ -60,7 +60,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("create error", func(t *testing.T) {
-		authService, mockUserRepo, mockBcryptHasher, _ := setup(t)
+		authService, mockUserRepo, mockBcryptHasher, _ := setupAuthServiceTest(t)
 
 		mockBcryptHasher.EXPECT().HashPassword(gomock.Any()).Return("test_hashed_password", nil)
 		expected := errors.New("test_error")
@@ -76,7 +76,7 @@ func TestRegister(t *testing.T) {
 	})
 
 	t.Run("hash error", func(t *testing.T) {
-		authService, _, mockBcryptHasher, _ := setup(t)
+		authService, _, mockBcryptHasher, _ := setupAuthServiceTest(t)
 
 		expected := errors.New(e.ERR_SERVICE_HASHING)
 		mockBcryptHasher.EXPECT().HashPassword(gomock.Any()).Return("", errors.New(e.ERR_SERVICE_HASHING))
@@ -93,7 +93,7 @@ func TestRegister(t *testing.T) {
 
 func TestLogin(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
-		authService, mockUserRepo, mockBcryptHasher, mockJwtGenerator := setup(t)
+		authService, mockUserRepo, mockBcryptHasher, mockJwtGenerator := setupAuthServiceTest(t)
 
 		output := responses.AuthLoginResp{
 			Email: "test_email",
@@ -120,7 +120,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("get by email error", func(t *testing.T) {
-		authService, mockUserRepo, _, _ := setup(t)
+		authService, mockUserRepo, _, _ := setupAuthServiceTest(t)
 
 		expected := errors.New("test_error")
 		mockUserRepo.EXPECT().GetByEmail(gomock.Any(), gomock.Any()).Return(nil, errors.New("test_error"))
@@ -135,7 +135,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("hash error", func(t *testing.T) {
-		authService, mockUserRepo, mockBcryptHasher, _ := setup(t)
+		authService, mockUserRepo, mockBcryptHasher, _ := setupAuthServiceTest(t)
 
 		mockUserRepo.EXPECT().GetByEmail(gomock.Any(), gomock.Any()).Return(&domain.User{
 			Id:       "test_id",
@@ -156,7 +156,7 @@ func TestLogin(t *testing.T) {
 	})
 
 	t.Run("", func(t *testing.T) {
-		authService, mockUserRepo, mockBcryptHasher, mockJwtGenerator := setup(t)
+		authService, mockUserRepo, mockBcryptHasher, mockJwtGenerator := setupAuthServiceTest(t)
 
 		mockUserRepo.EXPECT().GetByEmail(gomock.Any(), gomock.Any()).Return(&domain.User{
 			Id:       "test_id",
