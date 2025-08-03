@@ -72,12 +72,12 @@ func startWorkers(ctx context.Context, wg *sync.WaitGroup, workersList []ports.I
 
 func startAppWithGracefulShutdown(app *fiber.App, cancel context.CancelFunc, wg *sync.WaitGroup) {
 	go func() {
-		if err := app.Listen(":3000"); err != nil {
+		if err := app.Listen(":8080"); err != nil {
 			log.Println("Fiber server stopped:", err)
 		}
 	}()
 
-	log.Println("Server is running on http://localhost:3000")
+	log.Println("Server is running on http://localhost:8080")
 
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt)
