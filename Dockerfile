@@ -3,27 +3,23 @@ FROM golang:1.24.1-alpine AS builder
 
 WORKDIR /app
 
-# Install git (needed for go get) and other tools
 RUN apk add --no-cache git
 
-# Copy go.mod and go.sum and download deps
+# Cache deps
 COPY go.mod go.sum ./
 RUN go mod download
 
-# Copy the source code
+# Copy everything
 COPY . .
 
-# Build the binary
-RUN go build -o server ./cmd/main.go
+# Build the full cmd package (not just main.go)
+RUN go build -o server ./cmd
 
-# Final stage: minimal runtime image
+# Final image
 FROM alpine:latest
-
 WORKDIR /app
-
 COPY --from=builder /app/server .
 
-# Expose your app port
-EXPOSE 8080
+EXPOSE 8080 50051
 
 CMD ["./server"]

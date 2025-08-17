@@ -6,6 +6,7 @@ services:
     container_name: 7sol-be-challenge
     ports:
       - "8080:8080"
+      - "50051:50051"
     environment:
       - MONGO_URI=mongodb://mongo:27017/
       - MONGO_NAME=database
@@ -16,6 +17,7 @@ services:
       - APP_SECRET_KEY=example_secret_key
     depends_on:
       - mongo
+    restart: unless-stopped
 
   mongo:
     image: mongo:6
