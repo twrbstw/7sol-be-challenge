@@ -1,4 +1,4 @@
-package middleware
+package inbound
 
 import (
 	"seven-solutions-challenge/internal/domain"
