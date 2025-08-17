@@ -1,26 +1,26 @@
-package main
+package grpc
 
 import (
 	"context"
 	"log"
 	"net"
+	"sync"
 
 	"seven-solutions-challenge/internal/adapters/inbound/grpc"
-	d "seven-solutions-challenge/internal/adapters/outbound/db/mongo"
 	"seven-solutions-challenge/internal/adapters/outbound/db/mongo/repositories"
 	"seven-solutions-challenge/internal/adapters/outbound/hasher"
 	"seven-solutions-challenge/internal/app/services"
-	"seven-solutions-challenge/internal/config"
+	"seven-solutions-challenge/internal/domain"
 	"seven-solutions-challenge/proto/userpb"
+
+	d "seven-solutions-challenge/internal/adapters/outbound/db/mongo"
 
 	g "google.golang.org/grpc"
 	"google.golang.org/grpc/reflection"
 )
 
-func main() {
-	ctx := context.Background()
-	cfg := config.LoadDefaultConfig()
-	client := d.NewDatabaseClient(ctx, cfg.DbConfig)
+func StartGrpc(ctx context.Context, cfg domain.Configs, client d.DatabaseConnection, wg *sync.WaitGroup) {
+	defer wg.Done()
 
 	lis, err := net.Listen("tcp", ":50051")
 	if err != nil {
@@ -38,8 +38,23 @@ func main() {
 
 	reflection.Register(grpcServer)
 
-	log.Println("gRPC server listening on :50051")
-	if err := grpcServer.Serve(lis); err != nil {
-		log.Fatalf("failed to serve: %v", err)
+	serverErr := make(chan error, 1)
+	go func() {
+		log.Println("gRPC server listening on :50051")
+		if err := grpcServer.Serve(lis); err != nil {
+			serverErr <- err
+		}
+	}()
+
+	select {
+	case <-ctx.Done():
+		// context cancelled -> shutdown
+		log.Println("Shutting down gRPC server...")
+		grpcServer.GracefulStop()
+		log.Println("gRPC server shutdown complete.")
+
+	case err := <-serverErr:
+		// server crashed
+		log.Printf("gRPC server stopped with error: %v", err)
 	}
 }
