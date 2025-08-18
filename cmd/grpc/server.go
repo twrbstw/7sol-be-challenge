@@ -6,6 +6,7 @@ import (
 	"net"
 	"sync"
 
+	"seven-solutions-challenge/internal/adapters/inbound"
 	"seven-solutions-challenge/internal/adapters/inbound/grpc"
 	"seven-solutions-challenge/internal/adapters/outbound/db/mongo/repositories"
 	"seven-solutions-challenge/internal/adapters/outbound/hasher"
@@ -27,7 +28,11 @@ func StartGrpc(ctx context.Context, cfg domain.Configs, client d.DatabaseConnect
 		log.Fatalf("failed to listen: %v", err)
 	}
 
-	grpcServer := g.NewServer()
+	grpcServer := g.NewServer(
+		g.UnaryInterceptor(
+			inbound.NewAuthInterceptor(cfg.AppConfig),
+		),
+	)
 
 	userRepo := repositories.NewUserRepo(client)
 	bcryptHasher := hasher.NewBcryptHasher()
