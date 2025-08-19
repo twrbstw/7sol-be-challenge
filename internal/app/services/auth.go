@@ -44,7 +44,7 @@ func (a *AuthService) Login(ctx context.Context, req requests.AuthLoginReq) (*re
 		return nil, errors.New(e.ERR_SERVICE_GENERATING_JWT_FAILED)
 	}
 	return &responses.AuthLoginResp{
-		Email: user.Email,
+		Id:    user.Id,
 		Token: token,
 	}, nil
 }

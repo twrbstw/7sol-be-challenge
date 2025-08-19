@@ -10,6 +10,6 @@ type AuthRegisterResp struct {
 }
 
 type AuthLoginResp struct {
-	Email string `json:"email"`
+	Id    string `json:"id"`
 	Token string `json:"token"`
 }
