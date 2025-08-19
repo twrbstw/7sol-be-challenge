@@ -67,5 +67,10 @@ func (a *AuthService) Register(ctx context.Context, req requests.AuthRegisterReq
 		return nil, err
 	}
 
-	return &responses.AuthRegisterResp{Id: user.Id}, nil
+	return &responses.AuthRegisterResp{
+		Id:        user.Id,
+		Name:      user.Name,
+		Email:     user.Email,
+		CreatedAt: user.CreatedAt,
+	}, nil
 }
