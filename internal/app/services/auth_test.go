@@ -39,6 +39,12 @@ func setupAuthServiceTest(t *testing.T) (ports.IAuthService,
 func TestRegister(t *testing.T) {
 	t.Run("success", func(t *testing.T) {
 		authService, mockUserRepo, mockBcryptHasher, _ := setupAuthServiceTest(t)
+		expected := &responses.AuthRegisterResp{
+			Id:        "test_id",
+			Name:      "test_name",
+			Email:     "test_email",
+			CreatedAt: timeNow,
+		}
 
 		mockBcryptHasher.EXPECT().HashPassword(gomock.Any()).Return("test_hashed_password", nil)
 		output := domain.User{
@@ -50,12 +56,13 @@ func TestRegister(t *testing.T) {
 		}
 		mockUserRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(&output, nil)
 
-		err := authService.Register(ctx, requests.AuthRegisterReq{
+		resp, err := authService.Register(ctx, requests.AuthRegisterReq{
 			Name:     "test_name",
 			Email:    "test_email",
 			Password: "test_password",
 		})
 
+		assert.Equal(t, expected, resp)
 		assert.NoError(t, err)
 	})
 
@@ -66,7 +73,7 @@ func TestRegister(t *testing.T) {
 		expected := errors.New("test_error")
 		mockUserRepo.EXPECT().Create(gomock.Any(), gomock.Any()).Return(nil, errors.New("test_error"))
 
-		err := authService.Register(ctx, requests.AuthRegisterReq{
+		_, err := authService.Register(ctx, requests.AuthRegisterReq{
 			Name:     "test_name",
 			Email:    "test_email",
 			Password: "test_password",
@@ -81,7 +88,7 @@ func TestRegister(t *testing.T) {
 		expected := errors.New(e.ERR_SERVICE_HASHING)
 		mockBcryptHasher.EXPECT().HashPassword(gomock.Any()).Return("", errors.New(e.ERR_SERVICE_HASHING))
 
-		err := authService.Register(ctx, requests.AuthRegisterReq{
+		_, err := authService.Register(ctx, requests.AuthRegisterReq{
 			Name:     "test_name",
 			Email:    "test_email",
 			Password: "test_password",
@@ -96,7 +103,7 @@ func TestLogin(t *testing.T) {
 		authService, mockUserRepo, mockBcryptHasher, mockJwtGenerator := setupAuthServiceTest(t)
 
 		output := responses.AuthLoginResp{
-			Email: "test_email",
+			Id:    "test_id",
 			Token: "test_token",
 		}
 
@@ -115,7 +122,7 @@ func TestLogin(t *testing.T) {
 		})
 
 		assert.NoError(t, err)
-		assert.Equal(t, resp.Email, output.Email)
+		assert.Equal(t, resp.Id, output.Id)
 		assert.Equal(t, resp.Token, output.Token)
 	})
 
