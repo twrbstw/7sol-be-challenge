@@ -35,13 +35,13 @@ func (a AuthHandler) Register(ctx *fiber.Ctx) error {
 		return ctx.SendStatus(fiber.StatusBadRequest)
 	}
 
-	err = a.authService.Register(ctx.Context(), req)
+	resp, err := a.authService.Register(ctx.Context(), req)
 	if err != nil {
 		respCode := e.HandleErrResp(err)
 		return ctx.Status(respCode).SendString(err.Error())
 	}
 
-	return ctx.SendStatus(fiber.StatusCreated)
+	return ctx.Status(fiber.StatusCreated).JSON(resp)
 }
 
 func (a AuthHandler) Login(ctx *fiber.Ctx) error {

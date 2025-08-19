@@ -50,13 +50,13 @@ func (a *AuthService) Login(ctx context.Context, req requests.AuthLoginReq) (*re
 }
 
 // Register implements IAuthService.
-func (a *AuthService) Register(ctx context.Context, req requests.AuthRegisterReq) error {
+func (a *AuthService) Register(ctx context.Context, req requests.AuthRegisterReq) (*responses.AuthRegisterResp, error) {
 	hashedPassword, err := a.bcryptHasher.HashPassword(req.Password)
 	if err != nil {
-		return errors.New(e.ERR_SERVICE_HASHING)
+		return nil, errors.New(e.ERR_SERVICE_HASHING)
 	}
 
-	_, err = a.userRepo.Create(ctx, mongoreq.CreateReq{
+	user, err := a.userRepo.Create(ctx, mongoreq.CreateReq{
 		Id:        primitive.NewObjectID().Hex(),
 		Name:      req.Name,
 		Email:     req.Email,
@@ -64,8 +64,8 @@ func (a *AuthService) Register(ctx context.Context, req requests.AuthRegisterReq
 		CreatedAt: time.Now(),
 	})
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &responses.AuthRegisterResp{Id: user.Id}, nil
 }
