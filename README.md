@@ -5,17 +5,18 @@ This is a Go-based backend application built based on Hexagonal Architecture con
 ---
 
 ## Features
-- ✅ Hexagonal Architecture (Ports & Adapters)
-- ✅ User Registration & Login
-- ✅ Bcrypt Password Hashing
-- ✅ JWT Token Generation
-- ✅ MongoDB as the data store
-- ✅ Docker & Docker Compose setup
-- ✅ Unit tests with GoMock and Testify
-
+- ✅ User Management (HTTP)
+    - User Registration & Login
+    - User Creation
+    - User Inquiry
+    - User Update
+    - User Deletion
+- ✅ User Creation & Inquiry (gRPC)
+- ✅ Overall User Inquiry (Background worker)
 ---
 
 ## Project Structure
+### Hexagonal Architecture (Ports & Adapters)
 ```
 ├── cmd/                 # Application entry point
 │   └── main.go
@@ -25,6 +26,8 @@ This is a Go-based backend application built based on Hexagonal Architecture con
 │   ├── config/          # Configuration loader
 │   ├── domain/          # Core domain models and interfaces
 ├── pkg/                 # Utilities (e.g., error handling, validator)
+├── proto
+│   └── user.proto
 ├── .env
 ├── Dockerfile
 ├── docker-compose.yml
@@ -71,13 +74,14 @@ go tool cover -html=coverage.out
 ```
 
 ## API endpoints
-### Public Paths
+### HTTP
+#### Public Paths
 | Method | Endpoint         | Description         |
 |--------|------------------|---------------------|
 | POST   | /auth/register | Register a user     |
 | POST   | /auth/login    | Login and get token |
 
-### Private Paths
+#### Private Paths
 | Method | Endpoint         | Description         |
 |--------|------------------|---------------------|
 | GET   | /api/user/list    | List all users |
@@ -85,3 +89,26 @@ go tool cover -html=coverage.out
 | POST   | /api/user/    | Create user |
 | PUT   | /api/user/:uid    | Update user |
 | DELETE   | /api/user/:uid    | Delete user |
+
+### gRPC
+#### Service: `UserService`
+
+| Method       | Request Message       | Response Message       | Description               |
+|--------------|-----------------------|------------------------|---------------------------|
+| `CreateUser` | `CreateUserRequest`   | `CreateUserResponse`         | Create a new user         |
+| `GetUser`  | `GetUserRequest`    | `GetUserResponse`    | Retrieve specific user via id |
+
+## Playaround
+For HTTP server, please feel free to import attached postman collection from following directory 
+```/postman/7sol-be-challenge-http.postman_collection.json```
+
+For gRPC server, both methods require ```JWT token``` from http login response and include it in to metadata with the key of ```authorization``` 
+<br>eg.
+
+Method: GetUser
+```
+grpcurl -plaintext -H "authorization: Bearer {JWT_TOKEN}” -d '{"id”:”{uid}}’ localhost:50051 user.UserService/GetUser
+```
+Note(s): 
+- please replace {JWT_TOKEN} with the token from login response
+- please replace {uid} with the id of specific user
