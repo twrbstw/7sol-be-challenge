@@ -18,8 +18,8 @@ func (c *CreateUserReq) Validate() error {
 
 type UpdateUserReq struct {
 	Id    string
-	Name  string `json:"name,omitempty" validate:"required"`
-	Email string `json:"email,omitempty" validate:"required,email"`
+	Name  string `json:"name,omitempty"`
+	Email string `json:"email,omitempty" validate:"omitempty,email"`
 }
 
 func (u *UpdateUserReq) IsEmailAndNameEmpty() bool {
