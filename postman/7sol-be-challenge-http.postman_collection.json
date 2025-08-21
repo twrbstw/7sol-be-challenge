@@ -1,0 +1,322 @@
+{
+	"info": {
+		"_postman_id": "c5c246e0-c6d4-48f5-83b5-3b2a882c46f4",
+		"name": "7sol-be-challenge-http",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "11301467"
+	},
+	"item": [
+		{
+			"name": "public",
+			"item": [
+				{
+					"name": "register",
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\":\"Donald Trump\",\n    \"email\": \"donaldtrump@mail.com\",\n    \"password\": \"donaldtrump1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASED_URL}}/auth/register",
+							"host": [
+								"{{BASED_URL}}"
+							],
+							"path": [
+								"auth",
+								"register"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "login",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"let json = pm.response.json();",
+									"pm.collectionVariables.set(\"JWT_TOKEN\", json.token);",
+									""
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"email\": \"donaldtrump@mail.com\",\n    \"password\": \"donaldtrump1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASED_URL}}/auth/login",
+							"host": [
+								"{{BASED_URL}}"
+							],
+							"path": [
+								"auth",
+								"login"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "private",
+			"item": [
+				{
+					"name": "list user(s)",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{JWT_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASED_URL}}/api/user/list",
+							"host": [
+								"{{BASED_URL}}"
+							],
+							"path": [
+								"api",
+								"user",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "list user by id",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{JWT_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{BASED_URL}}/api/user/:uid",
+							"host": [
+								"{{BASED_URL}}"
+							],
+							"path": [
+								"api",
+								"user",
+								":uid"
+							],
+							"variable": [
+								{
+									"key": "uid",
+									"value": "68a4da19dba555a1953336d6",
+									"description": "user id"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "create user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{JWT_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "POST",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Edwin Vandersar\",\n    \"email\": \"edwinvandersar@mail.com\",\n    \"password\": \"edwinvandersar1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASED_URL}}/api/user/",
+							"host": [
+								"{{BASED_URL}}"
+							],
+							"path": [
+								"api",
+								"user",
+								""
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "update user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{JWT_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "PUT",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Adwin Vandersar\",\n    \"email\": \"Adwinvandersar@mail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASED_URL}}/api/user/:uid",
+							"host": [
+								"{{BASED_URL}}"
+							],
+							"path": [
+								"api",
+								"user",
+								":uid"
+							],
+							"variable": [
+								{
+									"key": "uid",
+									"value": "68a4da19dba555a1953336d6",
+									"description": "user id"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "delete user",
+					"request": {
+						"auth": {
+							"type": "bearer",
+							"bearer": [
+								{
+									"key": "token",
+									"value": "{{JWT_TOKEN}}",
+									"type": "string"
+								}
+							]
+						},
+						"method": "DELETE",
+						"header": [],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Adwin Vandersar\",\n    \"email\": \"Adwinvandersar@mail.com\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{BASED_URL}}/api/user/:uid",
+							"host": [
+								"{{BASED_URL}}"
+							],
+							"path": [
+								"api",
+								"user",
+								":uid"
+							],
+							"variable": [
+								{
+									"key": "uid",
+									"value": "68a4da19dba555a1953336d6",
+									"description": "user id"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "BASED_URL",
+			"value": "localhost:8080",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			}
+		},
+		{
+			"key": "JWT_TOKEN",
+			"value": "",
+			"type": "string",
+			"description": {
+				"content": "",
+				"type": "text/plain"
+			}
+		}
+	]
+}
